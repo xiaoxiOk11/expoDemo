@@ -3,9 +3,10 @@ import { Image } from 'expo-image';
 import { Link, router } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
-import { Button, Card, HelperText, Text, TextInput } from 'react-native-paper';
+import { Button, Card, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 
 export default function RegisterScreen() {
+  const theme = useTheme();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -46,7 +47,7 @@ export default function RegisterScreen() {
   const confirmError = touched.confirm && confirm !== password;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.blobOne} />
       <View style={styles.blobTwo} />
 
@@ -56,7 +57,7 @@ export default function RegisterScreen() {
             <Image source={require('../../assets/images/icon.png')} style={styles.logo} contentFit="contain" />
           </View>
           <Text variant="headlineSmall" style={styles.title}>创建账号</Text>
-          <Text variant="bodyMedium" style={styles.subtitle}>加入我们，开启新旅程</Text>
+          <Text variant="bodyMedium" style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>加入我们，开启新旅程</Text>
 
           <TextInput
             mode="outlined"
@@ -117,7 +118,9 @@ export default function RegisterScreen() {
           </Button>
 
           <View style={{ height: 12 }} />
-          <Link href="/auth/login">已有账号？去登录</Link>
+          <Link href="/auth/login" asChild>
+            <Text style={{ color: theme.colors.primary }}>已有账号？去登录</Text>
+          </Link>
         </Card.Content>
       </Card>
     </View>
@@ -129,7 +132,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     justifyContent: 'center',
-    backgroundColor: '#0f172a',
   },
   blobOne: {
     position: 'absolute',
@@ -169,7 +171,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     marginBottom: 8,
-    color: '#666',
     textAlign: 'center',
   },
   input: {

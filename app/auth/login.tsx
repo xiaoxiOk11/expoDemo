@@ -3,9 +3,10 @@ import { Image } from 'expo-image';
 import { Link, router } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Button, Card, HelperText, Text, TextInput } from 'react-native-paper';
+import { Button, Card, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 
 export default function LoginScreen() {
+  const theme = useTheme();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -15,14 +16,17 @@ export default function LoginScreen() {
     password: false,
   });
 
+  // login 事件
   const onLogin = async () => {
     try {
       setSubmitting(true);
+    
       if (!username || !password) {
         Alert.alert('提示', '请输入账号和密码');
         setSubmitting(false);
         return;
       }
+
       const token = generateVirtualToken();
       await setToken(token);
       router.replace('/');
@@ -37,7 +41,7 @@ export default function LoginScreen() {
   const passwordError = touched.password && password.length < 6;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.blobOne} />
       <View style={styles.blobTwo} />
 
@@ -47,7 +51,7 @@ export default function LoginScreen() {
             <Image source={require('../../assets/images/icon.png')} style={styles.logo} contentFit="contain" />
           </View>
           <Text variant="headlineSmall" style={styles.title}>欢迎回来</Text>
-          <Text variant="bodyMedium" style={styles.subtitle}>登录解锁更多精彩</Text>
+          <Text variant="bodyMedium" style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>登录解锁更多精彩</Text>
 
           <TextInput
             mode="outlined"
@@ -102,19 +106,23 @@ export default function LoginScreen() {
           <View style={{ height: 12 }} />
 
           <View style={styles.dividerRow}>
-            <View style={styles.divider} />
-            <Text style={{ marginHorizontal: 8, color: '#888' }}>或</Text>
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
+            <Text style={{ marginHorizontal: 8, color: theme.colors.onSurfaceVariant }}>或</Text>
+            <View style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
           </View>
 
           <View style={styles.socialRow}>
-            <Button mode="elevated" icon="apple" style={styles.socialButton} contentStyle={{ height: 44 }} >Apple</Button>
+            <Button mode="elevated" icon="apple" style={styles.socialButton} contentStyle={{ height: 44 }}>Apple</Button>
             <Button mode="elevated" icon="wechat" style={styles.socialButton} contentStyle={{ height: 44 }}>微信</Button>
+            <Button mode="elevated" icon="google" style={styles.socialButton} contentStyle={{ height: 44 }}>Google</Button>
+            <Button mode="elevated" icon="google" style={styles.socialButton} contentStyle={{ height: 44 }}>Google</Button>
             <Button mode="elevated" icon="google" style={styles.socialButton} contentStyle={{ height: 44 }}>Google</Button>
           </View>
 
           <View style={{ height: 12 }} />
-          <Link href="/auth/register">没有账号？去注册</Link>
+          <Link href="/auth/register" asChild>
+            <Text style={{ color: theme.colors.primary }}>没有账号？去注册</Text>
+          </Link>
         </Card.Content>
       </Card>
     </View>
@@ -126,7 +134,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     justifyContent: 'center',
-    backgroundColor: '#0f172a',
   },
   blobOne: {
     position: 'absolute',
@@ -166,7 +173,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     marginBottom: 8,
-    color: '#666',
     textAlign: 'center',
   },
   input: {
@@ -183,15 +189,16 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: '#e5e7eb',
   },
   socialRow: {
     flexDirection: 'row',
     gap: 8,
-    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    // justifyContent: 'center',
   },
   socialButton: {
-    flex: 1,
-    borderRadius: 12,
+    minWidth: 100,
+    flex: 0,
+    borderRadius: 5,
   },
 });

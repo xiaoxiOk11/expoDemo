@@ -1,11 +1,12 @@
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedView } from '@/components/ThemedView';
+import { useAccentColor } from '@/contexts/AccentColorContext';
 import { getToken } from '@/utils/auth';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
-import { Avatar, Button, Card, Divider, Surface, Text, TextInput, TouchableRipple } from 'react-native-paper';
+import { Avatar, Button, Card, Divider, Surface, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper';
 
 const { width } = Dimensions.get('window');
 
@@ -16,8 +17,8 @@ const carouselImages = [
 ];
 
 const icons = [
-  { key: 'music', title: '音乐', icon: 'music' },
-  { key: 'gift', title: '礼包', icon: 'gift' },
+  { key: 'music', title: '音乐', icon: 'music',url:'/music' },
+  { key: 'gift', title: '礼包', icon: 'gift',url:'/activity/activity' },
   { key: 'ranking', title: '排行', icon: 'trophy' },
   { key: 'daily', title: '每日', icon: 'calendar' },
   { key: 'store', title: '商店', icon: 'cart' },
@@ -30,9 +31,12 @@ const icons = [
 export default function HomeScreen() {
   const [checking, setChecking] = useState(true);
   const [activeSlide, setActiveSlide] = useState(0);
+  const { accentColor } = useAccentColor();
+  const theme = useTheme();
 
   useEffect(() => {
     (async () => {
+      console.log(window.navigator)
       const token = await getToken();
       if (!token) {
         router.replace('/auth/login');
@@ -42,20 +46,25 @@ export default function HomeScreen() {
     })();
   }, []);
 
+  const changePage = (item: any) => {
+    if(!item.url) return 
+    router.push(item.url);
+  }
+
   if (checking) {
     return null;
   }
 
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#E9ECF5', dark: '#111827' }}
+      headerBackgroundColor={{ light: theme.colors.surfaceVariant, dark: theme.colors.surfaceVariant }}
       headerImage={<View />}
     >
       <ThemedView style={styles.headerWrap}>
         <View style={styles.headerRow}>
           <View>
             <Text variant="titleLarge">你好，玩家</Text>
-            <Text variant="bodyMedium" style={{ color: '#6b7280' }}>祝你今天也有好心情</Text>
+            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>祝你今天也有好心情</Text>
           </View>
           <Avatar.Icon size={42} icon="account" />
         </View>
@@ -87,7 +96,7 @@ export default function HomeScreen() {
         </ScrollView>
         <View style={styles.dotsRow}>
           {carouselImages.map((_, i) => (
-            <View key={i} style={[styles.dot, activeSlide === i && styles.dotActive]} />
+            <View key={i} style={[styles.dot, activeSlide === i && { backgroundColor: accentColor, width: 16 }]} />
           ))}
         </View>
       </View>
@@ -95,10 +104,10 @@ export default function HomeScreen() {
       <ThemedView style={{ paddingHorizontal: 16, paddingTop: 4 }}>
         <View style={styles.grid}>
           {icons.map(item => (
-            <TouchableRipple key={item.key} style={styles.gridItem} onPress={() => router.push('/music')} borderless>
+            <TouchableRipple key={item.key} style={styles.gridItem} onPress={()=>changePage(item)} borderless>
               <View style={{ alignItems: 'center' }}>
                 <Surface style={[styles.gridIcon, { backgroundColor: '#EEF2FF' }]} elevation={0}>
-                  <Avatar.Icon size={40} icon={item.icon} style={{ backgroundColor: 'transparent' }} color="#6366f1" />
+                  <Avatar.Icon size={40} icon={item.icon} style={{ backgroundColor: 'transparent' }} color={accentColor} />
                 </Surface>
                 <Text style={{ marginTop: 6 }}>{item.title}</Text>
               </View>
@@ -123,7 +132,7 @@ export default function HomeScreen() {
               <Image source={require('@/assets/images/icon.png')} style={{ width: 140, height: 90, borderTopLeftRadius: 12, borderTopRightRadius: 12 }} contentFit="cover" />
               <Card.Content>
                 <Text numberOfLines={1} style={{ marginTop: 6 }}>推荐内容 {i}</Text>
-                <Text numberOfLines={1} style={{ color: '#6b7280', marginTop: 2 }}>精彩不容错过</Text>
+                <Text numberOfLines={1} style={{ color: theme.colors.onSurfaceVariant, marginTop: 2 }}>精彩不容错过</Text>
               </Card.Content>
             </Card>
           ))}
