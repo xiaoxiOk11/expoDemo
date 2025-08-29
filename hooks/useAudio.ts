@@ -1,125 +1,72 @@
-import { Audio } from 'expo-av';
-import { useEffect, useRef, useState } from 'react';
+import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus, type AudioSource } from 'expo-audio';
+import { useEffect } from 'react';
 
 interface UseAudioOptions {
   shouldPlay?: boolean;
   isLooping?: boolean;
   volume?: number;
 }
+// useAudioPlayer
 
-export function useAudio(source: any, options: UseAudioOptions = {}) {
-  const soundRef = useRef<Audio.Sound | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export function useAudio(source: AudioSource, options: UseAudioOptions = {}) {
+  const player = useAudioPlayer(source);
+  const status = useAudioPlayerStatus(player);
+
+  const isLoading = !status?.isLoaded;
+  const isPlaying = !!status?.playing;
 
   useEffect(() => {
-    let isMounted = true;
+    // 配置音频模式（可选）
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
+      allowsRecording: false,
+      interruptionMode: 'duckOthers',
+      shouldRouteThroughEarpiece: false,
+    }).catch(() => {});
+  }, []);
 
-    const loadSound = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  // 应用循环与音量等选项
+  useEffect(() => {
+    if (!player) return;
+    if (typeof options.isLooping === 'boolean') player.loop = options.isLooping;
+    if (typeof options.volume === 'number') player.volume = options.volume;
+  }, [player, options.isLooping, options.volume]);
 
-        // 设置音频模式
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: false,
-          shouldDuckAndroid: true,
-        });
-
-        // 创建并加载音频
-        const { sound } = await Audio.Sound.createAsync(
-          source,
-          {
-            shouldPlay: options.shouldPlay ?? false,
-            isLooping: options.isLooping ?? false,
-            volume: options.volume ?? 1.0,
-          },
-          (status) => {
-            if (isMounted && status.isLoaded) {
-              setIsPlaying(status.isPlaying ?? false);
-            }
-          }
-        );
-
-        if (isMounted) {
-          soundRef.current = sound;
-          setIsLoading(false);
-        } else {
-          // 如果组件已卸载，立即清理
-          await sound.unloadAsync();
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(err instanceof Error ? err.message : '音频加载失败');
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadSound();
-
-    // 清理函数
-    return () => {
-      isMounted = false;
-      if (soundRef.current) {
-        soundRef.current.unloadAsync();
-        soundRef.current = null;
-      }
-    };
-  }, [source]); // 只依赖 source，options 变化不重新加载
-
-  const play = async () => {
-    if (soundRef.current) {
-      try {
-        await soundRef.current.playAsync();
-        setIsPlaying(true);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : '播放失败');
-      }
+  // 根据 shouldPlay 自动播放/暂停
+  useEffect(() => {
+    if (!player || !status?.isLoaded) return;
+    if (options.shouldPlay) {
+      player.play();
+    } else if (options.shouldPlay === false && status.playing) {
+      player.pause();
     }
+  }, [player, status?.isLoaded, status?.playing, options.shouldPlay]);
+
+  const play = () => {
+    if (player) player.play();
   };
 
-  const pause = async () => {
-    if (soundRef.current) {
-      try {
-        await soundRef.current.pauseAsync();
-        setIsPlaying(false);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : '暂停失败');
-      }
-    }
+  const pause = () => {
+    if (player) player.pause();
   };
 
   const stop = async () => {
-    if (soundRef.current) {
-      try {
-        await soundRef.current.stopAsync();
-        setIsPlaying(false);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : '停止失败');
-      }
-    }
+    if (!player) return;
+    player.pause();
+    await player.seekTo(0);
   };
 
-  const toggle = async () => {
-    if (isPlaying) {
-      await pause();
-    } else {
-      await play();
-    }
+  const toggle = () => {
+    if (!player) return;
+    if (status?.playing) player.pause(); else player.play();
   };
 
-  const setVolume = async (volume: number) => {
-    if (soundRef.current) {
-      try {
-        await soundRef.current.setVolumeAsync(volume);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : '设置音量失败');
-      }
-    }
+  const setVolume = (volume: number) => {
+    if (player) player.volume = volume;
   };
+
+  const error: string | null = null;
 
   return {
     play,

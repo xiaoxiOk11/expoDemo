@@ -115,8 +115,6 @@ export default function LoginScreen() {
             <Button mode="elevated" icon="apple" style={styles.socialButton} contentStyle={{ height: 44 }}>Apple</Button>
             <Button mode="elevated" icon="wechat" style={styles.socialButton} contentStyle={{ height: 44 }}>微信</Button>
             <Button mode="elevated" icon="google" style={styles.socialButton} contentStyle={{ height: 44 }}>Google</Button>
-            <Button mode="elevated" icon="google" style={styles.socialButton} contentStyle={{ height: 44 }}>Google</Button>
-            <Button mode="elevated" icon="google" style={styles.socialButton} contentStyle={{ height: 44 }}>Google</Button>
           </View>
 
           <View style={{ height: 12 }} />
@@ -134,12 +132,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   blobOne: {
     position: 'absolute',
-    width: 240,
-    height: 240,
-    borderRadius: 120,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
     backgroundColor: '#7c3aed',
     opacity: 0.2,
     top: -40,
@@ -147,13 +146,13 @@ const styles = StyleSheet.create({
   },
   blobTwo: {
     position: 'absolute',
-    width: 260,
-    height: 260,
-    borderRadius: 130,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
     backgroundColor: '#22d3ee',
     opacity: 0.18,
-    bottom: -50,
-    left: -50,
+    bottom: -40,
+    left: -40,
   },
   card: {
     marginHorizontal: 16,
