@@ -5,11 +5,18 @@ import { StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
 export default function MusicScreen() {
-  const { toggle, isPlaying, isLoading, error } = useAudio(
+  const { toggle, isPlaying, isLoading, error,pause,play } = useAudio(
     require('@/assets/music.mp3'),
     { shouldPlay: true, isLooping: true }
   );
 
+  const btnClick = ()=>{
+    if(isPlaying){
+      pause()
+    }else{
+      play()
+    }
+  }
   return (
     <View style={styles.container}>
       <Text variant="titleMedium" style={styles.title}>背景音乐示例</Text>
@@ -18,7 +25,7 @@ export default function MusicScreen() {
           错误: {error}
         </Text>
       )}
-      <Button mode="contained" onPress={toggle} disabled={isLoading} loading={isLoading}>
+      <Button mode="contained" onPress={btnClick} disabled={isLoading} loading={isLoading}>
         {isLoading ? '加载中...' : isPlaying ? '暂停' : '播放'}
       </Button>
       <View style={{ height: 12 }} />

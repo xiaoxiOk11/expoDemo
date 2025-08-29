@@ -1,5 +1,5 @@
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus, type AudioSource } from 'expo-audio';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface UseAudioOptions {
   shouldPlay?: boolean;
@@ -7,7 +7,6 @@ interface UseAudioOptions {
   volume?: number;
 }
 // useAudioPlayer
-
 export function useAudio(source: AudioSource, options: UseAudioOptions = {}) {
   const player = useAudioPlayer(source);
   const status = useAudioPlayerStatus(player);
@@ -15,6 +14,8 @@ export function useAudio(source: AudioSource, options: UseAudioOptions = {}) {
   const isLoading = !status?.isLoaded;
   const isPlaying = !!status?.playing;
 
+  // 仅自动播放一次
+  const hasAutoPlayedRef = useRef(false);
   useEffect(() => {
     // 配置音频模式（可选）
     setAudioModeAsync({
@@ -23,28 +24,34 @@ export function useAudio(source: AudioSource, options: UseAudioOptions = {}) {
       allowsRecording: false,
       interruptionMode: 'duckOthers',
       shouldRouteThroughEarpiece: false,
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
-  // 应用循环与音量等选项
-  useEffect(() => {
-    if (!player) return;
-    if (typeof options.isLooping === 'boolean') player.loop = options.isLooping;
-    if (typeof options.volume === 'number') player.volume = options.volume;
-  }, [player, options.isLooping, options.volume]);
-
   // 根据 shouldPlay 自动播放/暂停
+  // 根据 shouldPlay 自动播放/暂停（仅自动一次，不覆盖手动暂停）
   useEffect(() => {
     if (!player || !status?.isLoaded) return;
-    if (options.shouldPlay) {
+
+    if (options.shouldPlay && !hasAutoPlayedRef.current) {
       player.play();
-    } else if (options.shouldPlay === false && status.playing) {
+      hasAutoPlayedRef.current = true;
+    }
+
+    if (options.shouldPlay === false && status.playing) {
       player.pause();
     }
-  }, [player, status?.isLoaded, status?.playing, options.shouldPlay]);
+    return () => {
+      if (!player) return;
+      try { player.pause(); } catch {}
+      try { player.remove?.(); } catch {}
+    };
+  }, [player, status?.isLoaded, options.shouldPlay]);
+
 
   const play = () => {
-    if (player) player.play();
+    if (player) {
+      player.play();
+    }
   };
 
   const pause = () => {
@@ -59,7 +66,12 @@ export function useAudio(source: AudioSource, options: UseAudioOptions = {}) {
 
   const toggle = () => {
     if (!player) return;
-    if (status?.playing) player.pause(); else player.play();
+
+    if (status?.playing) {
+      player.pause();
+    } else {
+      player.play();
+    }
   };
 
   const setVolume = (volume: number) => {

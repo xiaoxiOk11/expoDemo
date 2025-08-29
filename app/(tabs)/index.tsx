@@ -25,7 +25,6 @@ const icons = [
   { key: 'friends', title: '好友', icon: 'account-group' },
   { key: 'task', title: '任务', icon: 'check-circle' },
   { key: 'more', title: '更多', icon: 'dots-horizontal' },
-
 ];
 
 export default function HomeScreen() {
@@ -36,7 +35,6 @@ export default function HomeScreen() {
 
   useEffect(() => {
     (async () => {
-      console.log(window.navigator)
       const token = await getToken();
       if (!token) {
         router.replace('/auth/login');
@@ -129,10 +127,10 @@ export default function HomeScreen() {
         >
           {[1, 2, 3, 4].map((i) => (
             <Card key={i} style={styles.recoCard} mode="elevated">
-              <Image source={require('@/assets/images/icon.png')} style={{ width: 140, height: 90, borderTopLeftRadius: 12, borderTopRightRadius: 12 }} contentFit="cover" />
+              <Image source={require('@/assets/images/icon.png')} style={{ width: '100%', height: 90, borderTopLeftRadius: 12, borderTopRightRadius: 12 }} contentFit="cover" />
               <Card.Content>
-                <Text numberOfLines={1} style={{ marginTop: 6 }}>推荐内容 {i}</Text>
-                <Text numberOfLines={1} style={{ color: theme.colors.onSurfaceVariant, marginTop: 2 }}>精彩不容错过</Text>
+                <Text numberOfLines={1} style={{ marginTop: 6 }}>推荐内容 lorem {i}</Text>
+                <Text numberOfLines={2} style={{ color: theme.colors.onSurfaceVariant, marginTop: 2 }}>精彩不容错过 lorem ipsum dolor sit amet</Text>
               </Card.Content>
             </Card>
           ))}
